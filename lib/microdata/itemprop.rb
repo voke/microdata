@@ -89,6 +89,8 @@ module Microdata
         if attr = @element.attribute(attribute_name)
           value = attr.value
           url_attribute?(attribute_name) ? make_absolute_url(value) : value
+        else
+          @element.inner_text.strip
         end
       else
         @element.inner_text.strip
