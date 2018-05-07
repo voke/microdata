@@ -83,7 +83,7 @@ module Microdata
     end
 
     def extract_attribute_value(element, *lookups)
-      lookups.each do |attribute_name|
+      lookups.flatten.each do |attribute_name|
         if attribute = element.attribute(attribute_name)
           return attribute.value if attribute.value
         end
