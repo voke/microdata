@@ -16,7 +16,7 @@ module Microdata
 
     PRODUCT_PROPERTIES = {
       'priceCurrency' => 'content',
-      'availability' => 'href',
+      'availability' => ['href', 'content'],
       'price' => 'content'
     }
 
@@ -82,12 +82,20 @@ module Microdata
       NON_TEXTCONTENT_ELEMENTS[element] || PRODUCT_PROPERTIES[property_name]
     end
 
+    def extract_attribute_value(element, *lookups)
+      lookups.each do |attribute_name|
+        if attribute = element.attribute(attribute_name)
+          return attribute.value if attribute.value
+        end
+      end
+      nil
+    end
+
     def extract_property_value(property_name)
       element_name = @element.name
       attribute_name = resovle_attribute(element_name, property_name)
       if attribute_name
-        if attr = @element.attribute(attribute_name)
-          value = attr.value
+        if value = extract_attribute_value(@element, attribute_name)
           url_attribute?(attribute_name) ? make_absolute_url(value) : value
         else
           @element.inner_text.strip
