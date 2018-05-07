@@ -14,6 +14,12 @@ module Microdata
 
     URL_ATTRIBUTES = ['data', 'href', 'src']
 
+    PRODUCT_PROPERTIES = {
+      'priceCurrency' => 'content',
+      'availability' => 'href',
+      'price' => 'content'
+    }
+
     # A Hash representing the properties.
     # Hash is of the form {'property name' => 'value'}
     attr_reader :properties
@@ -40,7 +46,7 @@ module Microdata
     def extract_properties
       prop_names = extract_property_names
       prop_names.each_with_object({}) do |name, memo|
-        memo[name] = extract_property
+        memo[name] = extract_property(name)
       end
     end
 
@@ -53,6 +59,10 @@ module Microdata
       rescue URI::Error
         url
       end
+    end
+
+    def product_property?(property_name)
+      PRODUCT_PROPERTIES.has_key?(property_name)
     end
 
     def non_textcontent_element?(element)
@@ -68,22 +78,32 @@ module Microdata
       itemprop_attr ? itemprop_attr.value.split() : []
     end
 
-    def extract_property_value
-      element = @element.name
-      if non_textcontent_element?(element)
-        attribute = NON_TEXTCONTENT_ELEMENTS[element]
-        value = @element.attribute(attribute).value
-        url_attribute?(attribute) ? make_absolute_url(value) : value
+    def resovle_attribute(element, property_name)
+      if product_property?(property_name)
+        PRODUCT_PROPERTIES[property_name]
+      elsif non_textcontent_element?(element)
+        NON_TEXTCONTENT_ELEMENTS[element]
+      end
+    end
+
+    def extract_property_value(property_name)
+      element_name = @element.name
+      attribute_name = resovle_attribute(element_name, property_name)
+      if attribute_name
+        if attr = @element.attribute(attribute_name)
+          value = attr.value
+          url_attribute?(attribute_name) ? make_absolute_url(value) : value
+        end
       else
         @element.inner_text.strip
       end
     end
 
-    def extract_property
+    def extract_property(name)
       if @element.attribute('itemscope')
         Item.new(@element, @page_url)
       else
-        extract_property_value
+        extract_property_value(name)
       end
     end
 
