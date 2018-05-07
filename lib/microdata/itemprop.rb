@@ -79,11 +79,7 @@ module Microdata
     end
 
     def resovle_attribute(element, property_name)
-      if product_property?(property_name)
-        PRODUCT_PROPERTIES[property_name]
-      elsif non_textcontent_element?(element)
-        NON_TEXTCONTENT_ELEMENTS[element]
-      end
+      NON_TEXTCONTENT_ELEMENTS[element] || PRODUCT_PROPERTIES[property_name]
     end
 
     def extract_property_value(property_name)
