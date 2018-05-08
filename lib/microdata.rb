@@ -25,9 +25,10 @@ module Microdata
   # }
 
   def self.get_items(location)
-    content = open(location)
-    page_url = location
-    Microdata::Document.new(content, page_url).extract_items
+    open(location) do |res|
+      page_url = location
+      Microdata::Document.new(res.read, page_url).extract_items
+    end
   end
 
   def self.to_json(location)
