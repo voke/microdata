@@ -18,5 +18,13 @@ module Microdata
       end
     end
 
+    def cherrypick(type)
+      itemscopes = @doc.search("//*[@itemscope and contains(@itemtype, '#{type}')]")
+      return nil unless itemscopes
+      itemscopes.collect do |itemscope|
+        Item.new(itemscope, @page_url)
+      end
+    end
+
   end
 end
